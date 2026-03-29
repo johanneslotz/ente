@@ -328,8 +328,8 @@ Future<Float32List> preprocessImageClip(
   Dimensions dim,
   Uint8List rawRgbaBytes,
 ) async {
-  const int requiredWidth = 256;
-  const int requiredHeight = 256;
+  const int requiredWidth = 224;
+  const int requiredHeight = 224;
   const int requiredSize = 3 * requiredWidth * requiredHeight;
   final scale = max(requiredWidth / dim.width, requiredHeight / dim.height);
   final bool useAntiAlias = scale < 0.8;

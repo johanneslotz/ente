@@ -8,8 +8,8 @@ import numpy as np
 from ._runtime import ModelArtifact, create_ort_session, l2_normalize_rows
 
 
-CLIP_INPUT_WIDTH = 256
-CLIP_INPUT_HEIGHT = 256
+CLIP_INPUT_WIDTH = 224
+CLIP_INPUT_HEIGHT = 224
 
 
 def preprocess_clip_image(image_rgb: np.ndarray) -> np.ndarray:

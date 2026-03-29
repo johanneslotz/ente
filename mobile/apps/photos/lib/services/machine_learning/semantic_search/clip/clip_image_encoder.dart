@@ -9,11 +9,13 @@ import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
-  static const kRemoteBucketModelPath = "mobileclip_s2_image.onnx";
+  static const kRemoteBucketModelPath = "mobileclip_b_lt_image.onnx";
+  static const _kModelUrl =
+      "https://cloud.lotz.dev/s/jCscPdqpkmJXH3r/download?path=%2F&files=mobileclip_b_lt_image.onnx";
   static const _modelName = "ClipImageEncoder";
 
   @override
-  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+  String get modelRemotePath => _kModelUrl;
 
   @override
   Logger get logger => _logger;
@@ -67,7 +69,7 @@ class ClipImageEncoder extends MlModel {
     int sessionAddress,
   ) {
     final inputOrt =
-        OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 256, 256]);
+        OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(sessionAddress);
     final runOptions = OrtRunOptions();

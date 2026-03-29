@@ -1,0 +1,7 @@
+# Requirements for convert_mobileclip_b_lt.py
+# Install with: pip install -r requirements_convert.txt
+torch>=2.0
+open-clip-torch>=2.23.0
+onnx>=1.14
+onnxruntime>=1.16
+requests

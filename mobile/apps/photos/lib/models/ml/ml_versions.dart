@@ -1,7 +1,7 @@
 import "dart:io" show Platform;
 
 const faceMlVersion = 1;
-const clipMlVersion = 1;
+const clipMlVersion = 2;
 const clusterMlVersion = 1;
 const petMlVersion = 1;
 const minimumClusterSize = 2;

@@ -8,13 +8,15 @@ import "package:photos/utils/ml_util.dart";
 
 class ClipTextEncoder extends MlModel {
   static const kRemoteBucketModelPath =
-      "mobileclip_s2_text_opset18_quant.onnx"; // Quantized model
+      "mobileclip_b_lt_text_opset18_quant.onnx";
+  static const _kModelUrl =
+      "https://cloud.lotz.dev/s/jCscPdqpkmJXH3r/download?path=%2F&files=mobileclip_b_lt_text_opset18_quant.onnx";
   static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
 
   static const _modelName = "ClipTextEncoder";
 
   @override
-  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+  String get modelRemotePath => _kModelUrl;
   String get vocabRemotePath => kModelBucketEndpoint + _kVocabRemotePath;
 
   @override

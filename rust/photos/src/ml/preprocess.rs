@@ -10,8 +10,8 @@ use crate::ml::{
 
 const YOLO_INPUT_WIDTH: usize = 640;
 const YOLO_INPUT_HEIGHT: usize = 640;
-const CLIP_INPUT_WIDTH: usize = 256;
-const CLIP_INPUT_HEIGHT: usize = 256;
+const CLIP_INPUT_WIDTH: usize = 224;
+const CLIP_INPUT_HEIGHT: usize = 224;
 const PAD_VALUE: f32 = 114.0;
 
 pub fn preprocess_yolo(decoded: &DecodedImage) -> MlResult<(Vec<f32>, usize, usize, usize, usize)> {

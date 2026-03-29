@@ -8,7 +8,7 @@ use crate::ml::{
 pub fn run_clip_image(runtime: &MlRuntimeView<'_>, decoded: &DecodedImage) -> MlResult<ClipResult> {
     let input = preprocess::preprocess_clip(decoded)?;
     let clip_image = runtime.clip_image_session()?;
-    let (shape, output) = onnx::run_f32(&clip_image, input, [1, 3, 256, 256])?;
+    let (shape, output) = onnx::run_f32(&clip_image, input, [1, 3, 224, 224])?;
 
     let mut embedding = if shape.len() == 2 {
         if shape[0] != 1 {
