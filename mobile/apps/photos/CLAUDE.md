@@ -105,10 +105,21 @@ unzip -q /tmp/bt.zip -d /tmp/bt-ext && mv /tmp/bt-ext/android-15/* $ANDROID_HOME
 
 # NDK 28.0.13004108 (matches ndkVersion in app/build.gradle)
 curl -L --proxy "$HTTP_PROXY" \
-  "https://dl.google.com/android/repository/android-ndk-r28-linux.zip" -o /tmp/ndk.zip
-unzip -q /tmp/ndk.zip -d $ANDROID_HOME/ndk/
-ln -s $ANDROID_HOME/ndk/android-ndk-r28 $ANDROID_HOME/ndk/28.0.13004108
+  "https://dl.google.com/android/repository/android-ndk-r28-linux.zip" -o /tmp/ndk28.zip
+mkdir -p $ANDROID_HOME/ndk/28.0.13004108
+unzip -q /tmp/ndk28.zip -d /tmp/ndk28-ext
+mv /tmp/ndk28-ext/android-ndk-r28/* $ANDROID_HOME/ndk/28.0.13004108/
 export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.0.13004108
+
+# NDK 26.1.10909125 (Flutter 3.32.8 default for plugin subprojects e.g. :jni)
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/android-ndk-r26c-linux.zip" -o /tmp/ndk26.zip
+mkdir -p $ANDROID_HOME/ndk/26.1.10909125
+unzip -q /tmp/ndk26.zip -d /tmp/ndk26-ext
+mv /tmp/ndk26-ext/android-ndk-r26c/* $ANDROID_HOME/ndk/26.1.10909125/
+
+# Add ndk.dir to local.properties so all subprojects find NDK 28
+echo "ndk.dir=$ANDROID_HOME/ndk/28.0.13004108" >> android/local.properties
 
 flutter config --android-sdk "$ANDROID_HOME" --no-analytics
 
@@ -128,6 +139,10 @@ Notes:
 - Java is pre-installed (OpenJDK 21); Android SDK downloads require `--proxy "$HTTP_PROXY"` because Google domains are in Java's `nonProxyHosts` list
 - `lib/src/rust/` is gitignored; regenerate with `flutter_rust_bridge_codegen generate` whenever Rust API changes
 - The 3 `flutter analyze` errors in `integration_test/` do not block the APK build
+- **Both NDK 28 and NDK 26 must be installed**: the app's `build.gradle` requires NDK 28; Flutter 3.32.8 defaults all plugin subprojects (e.g. `:jni`) to NDK 26 via `gradle_utils.dart`
+- **Do NOT set `ndk.dir`** in `local.properties`; each Gradle subproject resolves its NDK by version from `$ANDROID_HOME/ndk/` automatically (NDK 28 for the app, NDK 26 for Flutter plugins)
+- For macOS, replace `-linux` with `-darwin` in the NDK download URLs
+- **Automated script**: `bash build-local.sh` from `mobile/apps/photos/` handles the entire setup (Linux and macOS)
 
 ## Development Commands
 
