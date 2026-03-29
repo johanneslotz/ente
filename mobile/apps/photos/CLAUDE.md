@@ -60,6 +60,75 @@ flutter analyze
 - Never commit to main branch
 - All CI checks must pass - run the checklist commands above before committing or creating PR
 
+## CI / Build Environment Setup (Linux x86_64)
+
+When building in a fresh Linux environment (e.g., a Claude Code remote session),
+install the following before running any Flutter or build commands:
+
+```bash
+# 1. Flutter 3.32.8
+cd /home/user
+curl -L --proxy "$HTTP_PROXY" \
+  "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.32.8-stable.tar.xz" \
+  -o flutter.tar.xz
+tar xf flutter.tar.xz
+export PATH="/home/user/flutter/bin:$PATH"
+git config --global --add safe.directory /home/user/flutter
+
+# 2. Android SDK components (Google hosts are in Java's nonProxyHosts, use curl)
+mkdir -p /home/user/android-sdk/{cmdline-tools,platform-tools,platforms,build-tools,ndk}
+export ANDROID_HOME=/home/user/android-sdk
+
+# Command-line tools
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" \
+  -o /tmp/cmdlt.zip
+unzip -q /tmp/cmdlt.zip -d /tmp/cmdlt-ext
+mv /tmp/cmdlt-ext/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+
+# Platform-tools
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/platform-tools-latest-linux.zip" -o /tmp/pt.zip
+unzip -q /tmp/pt.zip -d /tmp/pt-ext && mv /tmp/pt-ext/platform-tools/* $ANDROID_HOME/platform-tools/
+
+# android-36 (compileSdk)
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/platform-36_r01.zip" -o /tmp/p36.zip
+mkdir -p $ANDROID_HOME/platforms/android-36
+unzip -q /tmp/p36.zip -d /tmp/p36-ext && mv /tmp/p36-ext/android-36/* $ANDROID_HOME/platforms/android-36/
+
+# build-tools 35.0.1
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/build-tools_r35.0.1_linux.zip" -o /tmp/bt.zip
+mkdir -p $ANDROID_HOME/build-tools/35.0.1
+unzip -q /tmp/bt.zip -d /tmp/bt-ext && mv /tmp/bt-ext/android-15/* $ANDROID_HOME/build-tools/35.0.1/
+
+# NDK 28.0.13004108 (matches ndkVersion in app/build.gradle)
+curl -L --proxy "$HTTP_PROXY" \
+  "https://dl.google.com/android/repository/android-ndk-r28-linux.zip" -o /tmp/ndk.zip
+unzip -q /tmp/ndk.zip -d $ANDROID_HOME/ndk/
+ln -s $ANDROID_HOME/ndk/android-ndk-r28 $ANDROID_HOME/ndk/28.0.13004108
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.0.13004108
+
+flutter config --android-sdk "$ANDROID_HOME" --no-analytics
+
+# 3. Rust Android targets
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+# 4. Flutter Rust Bridge codegen + generate bindings (lib/src/rust/ is gitignored)
+cargo install flutter_rust_bridge_codegen
+flutter_rust_bridge_codegen generate
+
+# 5. Get dependencies and build
+flutter pub get
+flutter build apk --release --flavor independent
+```
+
+Notes:
+- Java is pre-installed (OpenJDK 21); Android SDK downloads require `--proxy "$HTTP_PROXY"` because Google domains are in Java's `nonProxyHosts` list
+- `lib/src/rust/` is gitignored; regenerate with `flutter_rust_bridge_codegen generate` whenever Rust API changes
+- The 3 `flutter analyze` errors in `integration_test/` do not block the APK build
+
 ## Development Commands
 
 ### Using Melos (Monorepo Management)
