@@ -20,11 +20,13 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
     String modelType,
     String modelPath, {
     int sessionsCount = 1,
+    bool preferNnapi = true,
   }) async {
     final result = await methodChannel.invokeMethod<bool>('init', {
       'modelType': modelType,
       'modelPath': modelPath,
       'sessionsCount': sessionsCount,
+      'preferNnapi': preferNnapi,
     });
     return result;
   }

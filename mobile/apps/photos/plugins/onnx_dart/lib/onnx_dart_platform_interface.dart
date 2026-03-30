@@ -32,6 +32,7 @@ abstract class OnnxDartPlatform extends PlatformInterface {
     String modelType,
     String modelPath, {
     int sessionsCount = 1,
+    bool preferNnapi = true,
   }) {
     throw UnimplementedError('init() has not been implemented.');
   }

@@ -75,13 +75,14 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val modelType = call.argument<String>("modelType")
         val modelPath = call.argument<String>("modelPath")
         val sessionsCount = call.argument<Int>("sessionsCount") ?: DEFAULT_SESSION_COUNT
+        val preferNnapi = call.argument<Boolean>("preferNnapi") ?: true
 
         if (modelType == null || modelPath == null) {
           result.error("INVALID_ARGUMENT", "Model type or path is missing", null)
           return
         }
 
-        init(ModelType.valueOf(modelType), modelPath, sessionsCount, result)
+        init(ModelType.valueOf(modelType), modelPath, sessionsCount, preferNnapi, result)
       }
       "release" -> {
         val modelType = call.argument<String>("modelType")
@@ -113,8 +114,8 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   }
 
 
-  private fun init(modelType: ModelType, modelPath: String, sessionsCount: Int, result: Result) {
-    Log.d(TAG, " v: $modelType, path: $modelPath, sessionsCount: $sessionsCount")
+  private fun init(modelType: ModelType, modelPath: String, sessionsCount: Int, preferNnapi: Boolean, result: Result) {
+    Log.d(TAG, " v: $modelType, path: $modelPath, sessionsCount: $sessionsCount, preferNnapi: $preferNnapi")
     scope.launch {
       val modelState: ModelState
       if (sessionMap.containsKey(modelType)) {
@@ -125,7 +126,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
       }
       if (!modelState.isInitialized) {
         for (i in 0 until sessionsCount) {
-          val session = createSession(faceOrtEnv, modelPath)
+          val session = createSession(faceOrtEnv, modelPath, preferNnapi)
           if (session != null) {
             modelState.sessionAddresses[i] = session
           }
@@ -182,7 +183,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputTensorShape = longArrayOf(totalSize, 112, 112, 3)
           }
           ModelType.ClipImageEncoder -> {
-            inputTensorShape = longArrayOf(1, 3, 256, 256)
+            inputTensorShape = longArrayOf(1, 3, 224, 224)
           }
           ModelType.ClipTextEncoder -> {
             inputTensorShape = longArrayOf(1, 77)
@@ -234,11 +235,15 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private fun createSession(env: OrtEnvironment, modalPath: String): OrtSession? {
+  private fun createSession(env: OrtEnvironment, modalPath: String, preferNnapi: Boolean): OrtSession? {
     val sessionOptions = OrtSession.SessionOptions()
     sessionOptions.setInterOpNumThreads(1)
     sessionOptions.setIntraOpNumThreads(1)
     sessionOptions.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
+    if (preferNnapi) {
+        Log.d(TAG, "Adding NNAPI to session options")
+        sessionOptions.addNnapi()
+    }
     return env.createSession(modalPath, sessionOptions)
   }
 

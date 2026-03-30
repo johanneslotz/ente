@@ -94,15 +94,20 @@ abstract class MlModel {
   // In contrast, the current FFI-based plugin leverages the session memory address for session management, which does not require a dedicated isolate.
   static Future<int> loadModel(
     String modelName,
-    String modelPath,
-  ) async {
+    String modelPath, {
+    bool preferNnapi = true,
+  }) async {
     isolateLogger
         .info('Start loading $modelName (platformPlugin: $usePlatformPlugin)');
     final time = DateTime.now();
     try {
       late int result;
       if (usePlatformPlugin) {
-        result = await _loadModelWithPlatformPlugin(modelName, modelPath);
+        result = await _loadModelWithPlatformPlugin(
+          modelName,
+          modelPath,
+          preferNnapi: preferNnapi,
+        );
       } else {
         result = await _loadModelWithFFI(modelName, modelPath);
       }
@@ -123,11 +128,16 @@ abstract class MlModel {
 
   static Future<int> _loadModelWithPlatformPlugin(
     String modelName,
-    String modelPath,
-  ) async {
+    String modelPath, {
+    bool preferNnapi = true,
+  }) async {
     final OnnxDart plugin = OnnxDart();
     final String? ortVersionString = await plugin.getPlatformVersion();
-    final bool? initResult = await plugin.init(modelName, modelPath);
+    final bool? initResult = await plugin.init(
+      modelName,
+      modelPath,
+      preferNnapi: preferNnapi,
+    );
     if (initResult == null || !initResult) {
       isolateLogger.severe("Failed to initialize $modelName with EntePlugin.");
       throw Exception("Failed to initialize $modelName with EntePlugin.");

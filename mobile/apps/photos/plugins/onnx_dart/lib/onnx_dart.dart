@@ -11,9 +11,14 @@ class OnnxDart {
     String modelType,
     String modelPath, {
     int sessionsCount = 1,
+    bool preferNnapi = true,
   }) {
-    return OnnxDartPlatform.instance
-        .init(modelType, modelPath, sessionsCount: sessionsCount);
+    return OnnxDartPlatform.instance.init(
+      modelType,
+      modelPath,
+      sessionsCount: sessionsCount,
+      preferNnapi: preferNnapi,
+    );
   }
 
   Future<bool?> release(String modelType) {

@@ -127,11 +127,13 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.loadIndexingModels:
       final modelNames = args['modelNames'] as List<String>;
       final modelPaths = args['modelPaths'] as List<String>;
+      final preferNnapi = args['preferNnapi'] as bool? ?? true;
       final addresses = <int>[];
       for (int i = 0; i < modelNames.length; i++) {
         final int address = await MlModel.loadModel(
           modelNames[i],
           modelPaths[i],
+          preferNnapi: preferNnapi,
         );
         addresses.add(address);
       }
@@ -190,9 +192,11 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.loadModel:
       final modelName = args['modelName'] as String;
       final modelPath = args['modelPath'] as String;
+      final preferNnapi = args['preferNnapi'] as bool? ?? true;
       final int address = await MlModel.loadModel(
         modelName,
         modelPath,
+        preferNnapi: preferNnapi,
       );
       return address;
 
