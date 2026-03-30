@@ -11,7 +11,7 @@ import "package:photos/utils/ml_util.dart";
 class ClipImageEncoder extends MlModel {
   static const kRemoteBucketModelPath = "mobileclip_b_lt_image.onnx";
   static const _kModelUrl =
-      "https://cloud.lotz.dev/s/jCscPdqpkmJXH3r/download?path=%2F&files=mobileclip_b_lt_image.onnx";
+      "https://cloud.lotz.dev/public.php/dav/files/jCscPdqpkmJXH3r/mobileclip_b_lt_image.onnx";
   static const _modelName = "ClipImageEncoder";
 
   @override

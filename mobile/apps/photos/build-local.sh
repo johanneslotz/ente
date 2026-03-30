@@ -217,8 +217,8 @@ EOF
 # 3. Rust Android targets (needed for Flutter Rust Bridge)
 # ---------------------------------------------------------------------------
 if command -v rustup &>/dev/null; then
-  info "Adding Rust Android targets…"
-  rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+  info "Adding Rust Android target (arm64 only)…"
+  rustup target add aarch64-linux-android
 else
   info "rustup not found — install Rust from https://rustup.rs/ if the Rust build fails."
 fi
@@ -229,7 +229,9 @@ fi
 if [[ ! -f "${SCRIPT_DIR}/lib/src/rust/frb_generated.dart" ]]; then
   info "Generating Rust bindings (flutter_rust_bridge_codegen)…"
   require_cmd cargo
-  cargo install flutter_rust_bridge_codegen
+  if ! command -v flutter_rust_bridge_codegen &>/dev/null; then
+    cargo install flutter_rust_bridge_codegen
+  fi
   (cd "${SCRIPT_DIR}" && flutter_rust_bridge_codegen generate)
 fi
 
@@ -294,8 +296,8 @@ cd "${SCRIPT_DIR}"
 info "Running flutter pub get…"
 flutter pub get
 
-info "Building release APK (flavor: independent)…"
-flutter build apk --release --flavor independent
+info "Building release APK (flavor: independent, arm64 only)…"
+flutter build apk --release --flavor independent --target-platform android-arm64
 
 APK="${SCRIPT_DIR}/build/app/outputs/flutter-apk/app-independent-release.apk"
 if [[ -f "$APK" ]]; then
